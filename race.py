@@ -60,6 +60,8 @@ class Car(GameSprite):
         self.enlarge_start_time = 0
 
     def colission_return(self):
+        global speed
+        speed = 8
         self.collision = True
         self.key = 'original'
 
@@ -97,23 +99,24 @@ class Obstacle(GameSprite):
             self.kill()
 
 class Bonus(GameSprite):
-    def __init__(self, new_image, x, y, width, height, speed) -> None:
+    def __init__(self, new_image, x, y, width, height) -> None:
         super().__init__(new_image, x, y, width, height)
-        self.speed = speed
         self.height = height
     def update(self):
-        self.rect.y += self.speed
+        global speed
+        self.rect.y += speed + 1
         if self.rect.y >= height + self.height:
             self.kill()
 
 class Human(GameSprite):
-    def __init__(self, new_image, x, y, width, height, speed) -> None:
+    def __init__(self, new_image, x, y, width, height) -> None:
         super().__init__(new_image, x, y, width, height)
         self.speed = speed
         self.height = height
 
     def update(self):
-        self.rect.y += self.speed
+        global speed
+        self.rect.y += speed + 1
         if self.rect.y >= + height + self.height:
             self.kill()
 
@@ -195,6 +198,7 @@ while not exit:
         replay_text = replay_label.render('Нажмите R, что бы начать заново', False, (193, 196, 199))
     if pygame.sprite.spritecollide(player, bonuses, True):
         player.start_bonus()
+        speed += 4
         bonus_sound.play()
 
     if time.time() - obstacles_last_spawn > obstacles_delay_time:
@@ -204,16 +208,16 @@ while not exit:
     if time.time() - new_last_spawn > new_delay_time:
         new_last_spawn = time.time()
         for i in range(1):
-            bonuses.add(Bonus('images/bonus.png', random.randint(20, 750), 0 - 100, 40, 40, 9))
+            bonuses.add(Bonus('images/bonus.png', random.randint(20, 750), 0 - 100, 40, 40))
     if time.time() - new_last_spawn2 > new_delay_time2:
         new_last_spawn2 = time.time()
         for d in range(1):
-            people.add(Human('images/human.png', random.choice(new_coor_line), 0 - 100, 80, 80, 9))
+            people.add(Human('images/human.png', random.choice(new_coor_line), 0 - 100, 80, 80))
 
 
     if not pause and not finish:
         elapsed_seconds = (pygame.time.get_ticks() - start_ticks) // 1000
-        bg_y += 8
+        bg_y += speed
         if bg_y == 600:
             bg_y = 0
         obstacles.update()
