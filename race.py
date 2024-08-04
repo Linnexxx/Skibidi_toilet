@@ -66,6 +66,8 @@ class Car(GameSprite):
         self.key = 'original'
 
     def start_bonus(self):
+        global speed
+        speed += 4
         self.collision = False
         self.key = 'boosted'
         if self.bonus_timer:
@@ -139,6 +141,7 @@ font = pygame.font.SysFont('Arial', 36)
 label = pygame.font.Font('fonts/ofont.ru_Roboto.ttf', 40)
 replay_label = pygame.font.Font('fonts/ofont.ru_Roboto.ttf', 25)
 paused_label = pygame.font.Font('fonts/ofont.ru_Roboto.ttf', 40)
+paused_label2 = pygame.font.Font('fonts/ofont.ru_Roboto.ttf', 30)
 paused_text = ''
 finish_text = font.render('Game Over', True, (255, 0, 0))
 replay_text = font.render('Press R to Replay', True, (255, 255, 255))
@@ -198,13 +201,13 @@ while not exit:
         replay_text = replay_label.render('Нажмите R, что бы начать заново', False, (193, 196, 199))
     if pygame.sprite.spritecollide(player, bonuses, True):
         player.start_bonus()
-        speed += 4
         bonus_sound.play()
 
     if time.time() - obstacles_last_spawn > obstacles_delay_time:
         obstacles_last_spawn = time.time()
-        for _ in range(random.randint(1, 3)):
-            obstacles.add(Obstacle('images/enemy.png', random.choice(coor_line), 0 - 100, 50, 115, 5))
+        if not pause:
+            for _ in range(random.randint(1, 3)):
+                obstacles.add(Obstacle('images/enemy.png', random.choice(coor_line), 0 - 100, 50, 115, 5))
     if time.time() - new_last_spawn > new_delay_time:
         new_last_spawn = time.time()
         for i in range(1):
@@ -217,8 +220,9 @@ while not exit:
 
     if not pause and not finish:
         elapsed_seconds = (pygame.time.get_ticks() - start_ticks) // 1000
+        print(speed)
         bg_y += speed
-        if bg_y == 600:
+        if bg_y >= 600:
             bg_y = 0
         obstacles.update()
         bonuses.update()
@@ -245,16 +249,19 @@ while not exit:
 
     if win:
         screen.fill((82, 252, 3))
-        screen.blit(won_text, (280, 250))
+        screen.blit(won_text, (170, 250))
         screen.blit(replay_text, (230, 300))
         car_sound.stop()
         player.kill()
         player = Car('images/car.png', width / 2, height - 170, 70, 130, 10)
+        obstacles.empty()
         # win_sound.play()
 
     if pause:
         paused_text = paused_label.render('Paused', False, (193, 196, 199))
-        screen.blit(paused_text, (280, 250))
+        paused_text2 = paused_label2.render('Press "p" to continue', False, (193, 196, 199))
+        screen.blit(paused_text2, (260, 100))
+        screen.blit(paused_text, (330, 230))
         car_sound.stop()
     pygame.display.update()
     clock.tick(60)
